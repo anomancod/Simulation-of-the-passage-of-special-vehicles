@@ -2,33 +2,35 @@
 #include <iostream>
 
 int CountOfLines = 4;
-int Traffic = 5;
+int Traffic = 15;
 bool LightCars = true;
 bool HeavyCars = false;
-int MaxSpeed = 60;
+int MaxSpeed = 100;
 
-void Win_Sim() 
+int Var;
+
+void Win_Sim()
 {
-    float cartimer = 0; // Таймер появления машин
+    float cartimer = 0; // Г’Г Г©Г¬ГҐГ° ГЇГ®ГїГўГ«ГҐГ­ГЁГї Г¬Г ГёГЁГ­
 
-    // Квадрат для полос
-    float BoL = CountOfLines * 110.f; // 100 - полоса, 10 - разделение
+    // ГЉГўГ Г¤Г°Г ГІ Г¤Г«Гї ГЇГ®Г«Г®Г±
+    float BoL = CountOfLines * 110.f; // 100 - ГЇГ®Г«Г®Г±Г , 10 - Г°Г Г§Г¤ГҐГ«ГҐГ­ГЁГҐ
 
     sf::ConvexShape BoxOfLines1;
     BoxOfLines1.setPointCount(4);
     BoxOfLines1.setFillColor(sf::Color::White);
-    BoxOfLines1.setPoint(0, sf::Vector2f(10.f, 10.f));
-    BoxOfLines1.setPoint(1, sf::Vector2f(20 + BoL, 10.f));
-    BoxOfLines1.setPoint(2, sf::Vector2f(20 + BoL, 790.f));
-    BoxOfLines1.setPoint(3, sf::Vector2f(10.f, 790.f));
+    BoxOfLines1.setPoint(0, sf::Vector2f(10.f, 0.f));
+    BoxOfLines1.setPoint(1, sf::Vector2f(20 + BoL, 0.f));
+    BoxOfLines1.setPoint(2, sf::Vector2f(20 + BoL, 800.f));
+    BoxOfLines1.setPoint(3, sf::Vector2f(10.f, 800.f));
 
     sf::ConvexShape BoxOfLines2;
     BoxOfLines2.setPointCount(4);
     BoxOfLines2.setFillColor(sf::Color::Black);
-    BoxOfLines2.setPoint(0, sf::Vector2f(20.f, 20.f));
-    BoxOfLines2.setPoint(1, sf::Vector2f(BoL + 10.f, 20.f));
-    BoxOfLines2.setPoint(2, sf::Vector2f(BoL + 10.f, 780.f));
-    BoxOfLines2.setPoint(3, sf::Vector2f(20.f, 780.f));
+    BoxOfLines2.setPoint(0, sf::Vector2f(20.f, 0.f));
+    BoxOfLines2.setPoint(1, sf::Vector2f(BoL + 10.f, 0.f));
+    BoxOfLines2.setPoint(2, sf::Vector2f(BoL + 10.f, 800.f));
+    BoxOfLines2.setPoint(3, sf::Vector2f(20.f, 800.f));
 
 
     sf::RenderWindow window(sf::VideoMode(1200, 800), "Road Simulator");
@@ -38,21 +40,27 @@ void Win_Sim()
 
     sf::Clock clock;
 
-    // всё для авто
+    // ГўГ±Вё Г¤Г«Гї Г ГўГІГ®
     sf::RectangleShape cars[20];
-    bool ingame[20] = {false};
-    float posX[4]{50, 160, 270, 380};
-    
+    bool ingame[20] = { false };
+    float dis[20] = { -1 }; // РґРёСЃС‚Р°РЅС†РёСЏ РєР°Р¶РґРѕР№ РјР°С€РёРЅС‹ РґРѕ РјР°С€РёРЅС‹ СЃРїРµС†С‚СЂР°РЅСЃРїРѕСЂС‚Р° РїРѕ РѕСЃРё Y
+    float posX[4]{ 52.5f, 162.5f, 272.5f, 382.5f };
+
     int carin = 0;
     int carline = 0;
 
+    sf::RectangleShape spCar;
+    spCar.setSize(sf::Vector2f(40.f, 70.f));
+    spCar.setFillColor(sf::Color::Red);
+    bool spCarInGame = false;
+
     while (window.isOpen())
     {
-        float time = clock.getElapsedTime().asMicroseconds(); // дать прошедшее время в микросекундах
-        clock.restart(); //перезагружает время
-        time = time / 1000; //скорость игры
+        float time = clock.getElapsedTime().asMicroseconds(); // Г¤Г ГІГј ГЇГ°Г®ГёГҐГ¤ГёГҐГҐ ГўГ°ГҐГ¬Гї Гў Г¬ГЁГЄГ°Г®Г±ГҐГЄГіГ­Г¤Г Гµ
+        clock.restart(); //ГЇГҐГ°ГҐГ§Г ГЈГ°ГіГ¦Г ГҐГІ ГўГ°ГҐГ¬Гї
+        time = time / 1000; //Г±ГЄГ®Г°Г®Г±ГІГј ГЁГЈГ°Г»
 
-        cartimer += time; // реализация машинного таймера
+        cartimer += time; // Г°ГҐГ Г«ГЁГ§Г Г¶ГЁГї Г¬Г ГёГЁГ­Г­Г®ГЈГ® ГІГ Г©Г¬ГҐГ°Г 
 
         sf::Event event;
         while (window.pollEvent(event))
@@ -60,11 +68,11 @@ void Win_Sim()
             if (event.type == sf::Event::Closed)
                 window.close();
         }
-        
+
         int startr1 = 7500;
         int endr1 = 50000;
         int r1 = std::rand() % (endr1 - startr1 + 1) + startr1;
-        // авто - спаун
+        // Г ГўГІГ® - Г±ГЇГ ГіГ­
         if (cartimer > r1 / Traffic)
         {
             if (carin == CountOfLines * 5) {
@@ -72,7 +80,7 @@ void Win_Sim()
             }
 
             ingame[carin] = true;
-            cars[carin].setSize(sf::Vector2f(50.f, 75.f));
+            cars[carin].setSize(sf::Vector2f(40.f, 70.f));
             cars[carin].setFillColor(sf::Color::Yellow);
 
             int startr2 = 0;
@@ -81,19 +89,19 @@ void Win_Sim()
 
             cars[carin].setPosition(posX[r2], 780.f);
             carin++;
-            
+
             cartimer = 0;
         }
 
-        // авто - движение (и удаление)
-        for (int t = 0; t < 20; t++) 
+        // Г ГўГІГ® - Г¤ГўГЁГ¦ГҐГ­ГЁГҐ (ГЁ ГіГ¤Г Г«ГҐГ­ГЁГҐ)
+        for (int t = 0; t < 20; t++)
         {
             if (t < 5) { carline = 0; }
             if (t < 10 && t >= 5) { carline = 1; }
             if (t < 15 && t >= 10) { carline = 2; }
             if (t < 20 && t >= 15) { carline = 3; }
 
-            if (ingame[t] = true) {
+            if (ingame[t] == true) {
                 if (cars[t].getPosition() == sf::Vector2f(posX[carline], 50.f)) {
                     ingame[t] = false;
                 }
@@ -104,20 +112,53 @@ void Win_Sim()
             }
         }
 
+        // СЃРїР°СѓРЅ СЃРїРµС†-РјР°С€РёРЅС‹
+        if (cartimer > 5000) 
+        {
+            spCarInGame = true;
+            if (Var == 1) 
+            {
+                spCar.setPosition(20.f, 780.f);
+            }
+        }
+
+        // РїСЂРѕРІРµСЂСЏРµРј РґРёСЃС‚Р°РЅС†РёСЋ РјР°С€РёРЅ РґРѕ СЃРїРµС†С‚СЂР°РЅСЃРїРѕСЂС‚Р°
+        sf::Vector2f soCarPos = spCar.getPosition();
+        for (int t = 0; t < 20; t++)
+        {
+            if (ingame[t] == true) 
+            {
+                if (Var == 1) {
+                    soCarPos.x = soCarPos.x + 32.5f;
+                    if (cars[t].getPosition() == soCarPos + (5.f, 10.f)) 
+                    {
+
+                    }
+                }
+            }
+        }
+
+        // РґРІРёР¶РµРЅРёРµ СЃРїРµС†-РјР°С€РёРЅС‹
+        if (spCarInGame == true) 
+        {
+            // РїСЂРѕРІРµСЂСЏРµРј СЂР°СЃСЃС‚РѕСЏРЅРёРµ РґРѕ РІСЃРµС… РґСЂСѓРі РјР°С€РёРЅ
+            
+        }
+
         window.clear(sf::Color::Black);
 
-        // Коробка для полос
+        // ГЉГ®Г°Г®ГЎГЄГ  Г¤Г«Гї ГЇГ®Г«Г®Г±
         window.draw(BoxOfLines1);
         window.draw(BoxOfLines2);
 
-        // Рисуем полосы
+        // ГђГЁГ±ГіГҐГ¬ ГЇГ®Г«Г®Г±Г»
         for (int i = 0; i < CountOfLines - 1; i++)
         {
             sf::RectangleShape line(sf::Vector2f(10.f, 50.f));
 
-            for (int j = 0; j < 15; j++)
+            for (int j = 0; j < 16; j++)
             {
-                line.setPosition(20.f + ((i + 1) * 100) + i * 10.f, 20.f + j * 50.f);
+                line.setPosition(20.f + ((i + 1) * 100) + i * 10.f, -20.f + j * 50.f);
 
                 if (j % 2 == 0) {
                     line.setFillColor(sf::Color::Black);
@@ -129,7 +170,7 @@ void Win_Sim()
             }
         }
 
-        // авто - рисовка
+        // Г ГўГІГ® - Г°ГЁГ±Г®ГўГЄГ 
         for (int t = 0; t < 20; t++)
         {
             if (ingame[t] = true) {
@@ -154,12 +195,12 @@ void Win_Set()
     sf::Font font;
     font.loadFromFile("TNR.ttf");
 
-    // кол-во полос
+    // ГЄГ®Г«-ГўГ® ГЇГ®Г«Г®Г±
     sf::Text text1;
     text1.setFont(font);
     text1.setCharacterSize(50);
     text1.setFillColor(sf::Color::White);
-    text1.setString(L"Кол-во полос:");
+    text1.setString(L"ГЉГ®Г«-ГўГ® ГЇГ®Г«Г®Г±:");
     text1.setPosition(10, 0);
     //1
     sf::RectangleShape box1v11(sf::Vector2f(50.f, 50.f));
@@ -197,12 +238,12 @@ void Win_Set()
     box1v24.setFillColor(sf::Color::Black);
     box1v24.setPosition(500, 15);
 
-    // общая загруженность
+    // Г®ГЎГ№Г Гї Г§Г ГЈГ°ГіГ¦ГҐГ­Г­Г®Г±ГІГј
     sf::Text text2;
     text2.setFont(font);
     text2.setCharacterSize(50);
     text2.setFillColor(sf::Color::White);
-    text2.setString(L"Общая загруженность:");
+    text2.setString(L"ГЋГЎГ№Г Гї Г§Г ГЈГ°ГіГ¦ГҐГ­Г­Г®Г±ГІГј:");
     text2.setPosition(10, 70);
 
     sf::RectangleShape box12(sf::Vector2f(50.f, 50.f));
@@ -212,12 +253,12 @@ void Win_Set()
     box22.setFillColor(sf::Color::Black);
     box22.setPosition(510, 85);
 
-    // легковые автомобили
+    // Г«ГҐГЈГЄГ®ГўГ»ГҐ Г ГўГІГ®Г¬Г®ГЎГЁГ«ГЁ
     sf::Text text3;
     text3.setFont(font);
     text3.setCharacterSize(50);
     text3.setFillColor(sf::Color::White);
-    text3.setString(L"Легковые автомобили:");
+    text3.setString(L"Г‹ГҐГЈГЄГ®ГўГ»ГҐ Г ГўГІГ®Г¬Г®ГЎГЁГ«ГЁ:");
     text3.setPosition(10, 140);
 
     sf::RectangleShape box13(sf::Vector2f(50.f, 50.f));
@@ -227,12 +268,12 @@ void Win_Set()
     box23.setFillColor(sf::Color::Black);
     box23.setPosition(500, 155);
 
-    // тяжелые автомобили
+    // ГІГїГ¦ГҐГ«Г»ГҐ Г ГўГІГ®Г¬Г®ГЎГЁГ«ГЁ
     sf::Text text4;
     text4.setFont(font);
     text4.setCharacterSize(50);
     text4.setFillColor(sf::Color::White);
-    text4.setString(L"Тяжелые автомобили:");
+    text4.setString(L"Г’ГїГ¦ГҐГ«Г»ГҐ Г ГўГІГ®Г¬Г®ГЎГЁГ«ГЁ:");
     text4.setPosition(10, 350);
 
     sf::RectangleShape box14(sf::Vector2f(50.f, 50.f));
@@ -242,12 +283,12 @@ void Win_Set()
     box24.setFillColor(sf::Color::Black);
     box24.setPosition(485, 365);
 
-    // скоростные ограничения
+    // Г±ГЄГ®Г°Г®Г±ГІГ­Г»ГҐ Г®ГЈГ°Г Г­ГЁГ·ГҐГ­ГЁГї
     sf::Text text5;
     text5.setFont(font);
     text5.setCharacterSize(50);
     text5.setFillColor(sf::Color::White);
-    text5.setString(L"Скоростные ограничения:");
+    text5.setString(L"Г‘ГЄГ®Г°Г®Г±ГІГ­Г»ГҐ Г®ГЈГ°Г Г­ГЁГ·ГҐГ­ГЁГї:");
     text5.setPosition(10, 420);
 
     sf::RectangleShape box15(sf::Vector2f(50.f, 50.f));
@@ -265,27 +306,27 @@ void Win_Set()
             if (event.type == sf::Event::Closed)
                 window.close();
 
-            if (event.type = sf::Event::MouseButtonPressed) 
+            if (event.type = sf::Event::MouseButtonPressed)
             {
                 int xm;
                 int ym;
                 xm = event.mouseButton.x;
                 ym = event.mouseButton.y;
 
-                // Считывания нажатия на коробки
+                // Г‘Г·ГЁГІГ»ГўГ Г­ГЁГї Г­Г Г¦Г ГІГЁГї Г­Г  ГЄГ®Г°Г®ГЎГЄГЁ
             }
         }
 
         window.clear(sf::Color::Black);
 
-        // текста
+        // ГІГҐГЄГ±ГІГ 
         window.draw(text1);
         window.draw(text2);
         window.draw(text3);
         window.draw(text4);
         window.draw(text5);
 
-        // коробки
+        // ГЄГ®Г°Г®ГЎГЄГЁ
         window.draw(box12);
         window.draw(box22);
         window.draw(box13);
@@ -295,7 +336,7 @@ void Win_Set()
         window.draw(box15);
         window.draw(box25);
 
-        // коробки-варианты
+        // ГЄГ®Г°Г®ГЎГЄГЁ-ГўГ Г°ГЁГ Г­ГІГ»
         window.draw(box1v11);
         window.draw(box1v21);
         window.draw(box1v12);
@@ -305,7 +346,7 @@ void Win_Set()
         window.draw(box1v14);
         window.draw(box1v24);
 
-        // коробки-текста
+        // ГЄГ®Г°Г®ГЎГЄГЁ-ГІГҐГЄГ±ГІГ 
         window.draw(textb11);
 
         window.display();
@@ -314,7 +355,9 @@ void Win_Set()
 
 int main()
 {
-    Win_Set();
+    Var = 1;
+    //Var = 2;
 
-    //Win_Sim();
+    //Win_Set();
+    Win_Sim();
 }
