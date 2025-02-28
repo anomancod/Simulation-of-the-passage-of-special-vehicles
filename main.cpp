@@ -2,10 +2,10 @@
 #include <iostream>
 
 int CountOfLines = 4;
-int Traffic = 15;
+int Traffic = 5;
 bool LightCars = true;
 bool HeavyCars = false;
-int MaxSpeed = 100;
+int MaxSpeed = 50;
 
 int Var;
 
@@ -41,9 +41,9 @@ void Win_Sim()
     sf::Clock clock;
 
     // âñ¸ äëÿ àâòî
-    sf::RectangleShape cars[20];
-    bool ingame[20] = { false };
-    float dis[20] = { -1 }; // дистанция каждой машины до машины спецтранспорта по оси Y
+    sf::RectangleShape cars[100];
+    bool ingame[100] = { false };
+    float dis[100] = { -1 }; // дистанция каждой машины до машины спецтранспорта по оси Y
     float posX[4]{ 52.5f, 162.5f, 272.5f, 382.5f };
 
     int carin = 0;
@@ -69,51 +69,66 @@ void Win_Sim()
                 window.close();
         }
 
-        int startr1 = 7500;
-        int endr1 = 50000;
+        int startr1 = 1000;
+        int endr1 = 5000;
+        int r2 = -1;
         int r1 = std::rand() % (endr1 - startr1 + 1) + startr1;
         // àâòî - ñïàóí
         if (cartimer > r1 / Traffic)
         {
-            if (carin == CountOfLines * 5) {
+            if (carin == CountOfLines * 25) {
                 carin = 0;
             }
 
-            ingame[carin] = true;
             cars[carin].setSize(sf::Vector2f(40.f, 70.f));
             cars[carin].setFillColor(sf::Color::Yellow);
 
             int startr2 = 0;
             int endr2 = 3;
+            int rpast = r2;
             int r2 = std::rand() % (endr2 - startr2 + 1) + startr2;
+            while (r2 == rpast){ r2 = std::rand() % (endr2 - startr2 + 1) + startr2; }
 
-            cars[carin].setPosition(posX[r2], 780.f);
-            carin++;
+            bool countingame, countinlayer = false;
+            for (int t = 0; t < 100; t++) {
+                if (ingame[t] == true) {
+                    countingame = true;
+                    sf::Vector2f carpos = cars[t].getPosition();
+                    if (posX[r2] == carpos.x) {
+                        countinlayer = true;
+                        if (carpos.y < 700) {
+                            cars[carin].setPosition(posX[r2], 780.f);
+                            carin++;
+                            ingame[carin] = true;
+                            cartimer = 0;
 
-            cartimer = 0;
-        }
-
-        // àâòî - äâèæåíèå (è óäàëåíèå)
-        for (int t = 0; t < 20; t++)
-        {
-            if (t < 5) { carline = 0; }
-            if (t < 10 && t >= 5) { carline = 1; }
-            if (t < 15 && t >= 10) { carline = 2; }
-            if (t < 20 && t >= 15) { carline = 3; }
-
-            if (ingame[t] == true) {
-                if (cars[t].getPosition() == sf::Vector2f(posX[carline], 50.f)) {
-                    ingame[t] = false;
+                            std::cout << "It just works!";
+                        }
+                    }
+                    if (t == 99 && countinlayer == false) {
+                        cars[carin].setPosition(posX[r2], 780.f);
+                        carin++;
+                        ingame[carin] = true;
+                        cartimer = 0;
+                    }
                 }
-                else {
-                    cars[t].move(0.f, -0.1f * time * (MaxSpeed / 50));
-                    //std::cout << "it just works";
+                if (countingame == false) {
+                    cars[carin].setPosition(posX[r2], 780.f);
+                    carin++;
+                    ingame[carin] = true;
+                    cartimer = 0;
                 }
             }
         }
 
+        // àâòî - äâèæåíèå (è óäàëåíèå)
+        for (int t = 0; t < 100; t++)
+        {
+            cars[t].move(0.f, -0.1f * time * (MaxSpeed / 50));
+        }
+
         // спаун спец-машины
-        if (cartimer > 5000) 
+        /*if (cartimer > 5000)
         {
             spCarInGame = true;
             if (Var == 1) 
@@ -143,7 +158,7 @@ void Win_Sim()
         {
             // проверяем расстояние до всех друг машин
             
-        }
+        }*/
 
         window.clear(sf::Color::Black);
 
@@ -171,7 +186,7 @@ void Win_Sim()
         }
 
         // àâòî - ðèñîâêà
-        for (int t = 0; t < 20; t++)
+        for (int t = 0; t < 100; t++)
         {
             if (ingame[t] = true) {
                 window.draw(cars[t]);
