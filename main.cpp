@@ -5,13 +5,16 @@ int CountOfLines = 4;
 int Traffic = 5;
 bool LightCars = true;
 bool HeavyCars = false;
-int MaxSpeed = 50;
+int MaxSpeed = 5;
 
 int Var;
 
 void Win_Sim()
 {
+    int r2 = -1;
+    
     float cartimer = 0; // Òàéìåð ïîÿâëåíèÿ ìàøèí
+    float lineTimer[4] = { 1000 };
 
     // Êâàäðàò äëÿ ïîëîñ
     float BoL = CountOfLines * 110.f; // 100 - ïîëîñà, 10 - ðàçäåëåíèå
@@ -61,6 +64,10 @@ void Win_Sim()
         time = time / 1000; //ñêîðîñòü èãðû
 
         cartimer += time; // ðåàëèçàöèÿ ìàøèííîãî òàéìåðà
+        lineTimer[0] += time;
+        lineTimer[1] += time;
+        lineTimer[2] += time;
+        lineTimer[3] += time;
 
         sf::Event event;
         while (window.pollEvent(event))
@@ -70,53 +77,32 @@ void Win_Sim()
         }
 
         int startr1 = 1000;
-        int endr1 = 5000;
-        int r2 = -1;
+        int endr1 = 7500;
         int r1 = std::rand() % (endr1 - startr1 + 1) + startr1;
         // àâòî - ñïàóí
         if (cartimer > r1 / Traffic)
         {
-            if (carin == CountOfLines * 25) {
-                carin = 0;
-            }
-
-            cars[carin].setSize(sf::Vector2f(40.f, 70.f));
-            cars[carin].setFillColor(sf::Color::Yellow);
-
             int startr2 = 0;
             int endr2 = 3;
             int rpast = r2;
             int r2 = std::rand() % (endr2 - startr2 + 1) + startr2;
-            while (r2 == rpast){ r2 = std::rand() % (endr2 - startr2 + 1) + startr2; }
+            while (r2 == rpast) { r2 = std::rand() % (endr2 - startr2 + 1) + startr2; } // r2 - polosa
 
-            bool countingame, countinlayer = false;
-            for (int t = 0; t < 100; t++) {
-                if (ingame[t] == true) {
-                    countingame = true;
-                    sf::Vector2f carpos = cars[t].getPosition();
-                    if (posX[r2] == carpos.x) {
-                        countinlayer = true;
-                        if (carpos.y < 700) {
-                            cars[carin].setPosition(posX[r2], 780.f);
-                            carin++;
-                            ingame[carin] = true;
-                            cartimer = 0;
+            if (lineTimer[r2] > 9000 / MaxSpeed) 
+            {
+                cars[carin].setSize(sf::Vector2f(40.f, 70.f));
+                cars[carin].setFillColor(sf::Color::Yellow);
 
-                            std::cout << "It just works!";
-                        }
-                    }
-                    if (t == 99 && countinlayer == false) {
-                        cars[carin].setPosition(posX[r2], 780.f);
-                        carin++;
-                        ingame[carin] = true;
-                        cartimer = 0;
-                    }
-                }
-                if (countingame == false) {
-                    cars[carin].setPosition(posX[r2], 780.f);
-                    carin++;
-                    ingame[carin] = true;
-                    cartimer = 0;
+                cars[carin].setPosition(posX[r2], 780.f);
+                carin++;
+                ingame[carin] = true;
+                cartimer = 0;
+                lineTimer[r2] = 0;
+
+                std::cout << carin << std::endl;
+
+                if (carin == CountOfLines * 25) {
+                    carin = 0;
                 }
             }
         }
@@ -124,14 +110,14 @@ void Win_Sim()
         // àâòî - äâèæåíèå (è óäàëåíèå)
         for (int t = 0; t < 100; t++)
         {
-            cars[t].move(0.f, -0.1f * time * (MaxSpeed / 50));
+            cars[t].move(0.f, (-0.05f + MaxSpeed / 10) * time);
         }
 
         // спаун спец-машины
         /*if (cartimer > 5000)
         {
             spCarInGame = true;
-            if (Var == 1) 
+            if (Var == 1)
             {
                 spCar.setPosition(20.f, 780.f);
             }
@@ -141,11 +127,11 @@ void Win_Sim()
         sf::Vector2f soCarPos = spCar.getPosition();
         for (int t = 0; t < 20; t++)
         {
-            if (ingame[t] == true) 
+            if (ingame[t] == true)
             {
                 if (Var == 1) {
                     soCarPos.x = soCarPos.x + 32.5f;
-                    if (cars[t].getPosition() == soCarPos + (5.f, 10.f)) 
+                    if (cars[t].getPosition() == soCarPos + (5.f, 10.f))
                     {
 
                     }
@@ -154,10 +140,10 @@ void Win_Sim()
         }
 
         // движение спец-машины
-        if (spCarInGame == true) 
+        if (spCarInGame == true)
         {
             // проверяем расстояние до всех друг машин
-            
+
         }*/
 
         window.clear(sf::Color::Black);
