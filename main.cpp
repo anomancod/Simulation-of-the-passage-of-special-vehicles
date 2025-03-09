@@ -57,6 +57,7 @@ void Win_Sim()
     int spCarIs = 25;
     bool slowDown = false;
     float spCarSpd = -0.05 + MaxSpeed / 10;
+    bool carsAheadCount = false;
 
     while (window.isOpen())
     {
@@ -77,17 +78,19 @@ void Win_Sim()
                 window.close();
         }
 
-        int startr1 = 2000;
-        int endr1 = 10000;
+        int startr1 = 1500;
+        int endr1 = 7500;
+        int startr2 = 0;
+        int endr2 = 3;
         int r1 = std::rand() % (endr1 - startr1 + 1) + startr1;
         // àâòî - ñïàóí
         if (cartimer > r1 / Traffic)
         {
-            if (carin == spCarIs) 
+            if (carin == spCarIs)
             {
                 if (Var == 1) // 1 var (sboku)
                 {
-                    if (lineTimer[0] > 9000 / MaxSpeed) 
+                    if (lineTimer[0] > 9000 / MaxSpeed)
                     {
                         cars[carin].setSize(sf::Vector2f(40.f, 70.f));
                         cars[carin].setFillColor(sf::Color::Green);
@@ -95,10 +98,13 @@ void Win_Sim()
                         cars[carin].setPosition(posX[0], 780.f);
                         carin++;
                         ingame[carin] = true;
+                        spCarInGame = true;
                         cartimer = 0;
                         lineTimer[0] = 0;
 
                         std::cout << carin << std::endl;
+
+                        int startr2 = 1; // teper pozadi spec transporta machinu ne poyavlyautsa
                     }
                 }
                 else // 2 var (megdu)
@@ -106,10 +112,8 @@ void Win_Sim()
                     //
                 }
             }
-            else 
+            else
             {
-                int startr2 = 0;
-                int endr2 = 3;
                 int rpast = r2;
                 int r2 = std::rand() % (endr2 - startr2 + 1) + startr2;
                 while (r2 == rpast) { r2 = std::rand() % (endr2 - startr2 + 1) + startr2; } // r2 - polosa
@@ -146,11 +150,10 @@ void Win_Sim()
                         if (carPos.x == 52.5f) // proveraym na 1 polose li
                         {
                             sf::Vector2f spCarPos = cars[spCarIs].getPosition();
-                            float dis = carPos.y - spCarPos.y;
+                            float dis = spCarPos.y - carPos.y;
                             if (dis > 0 && dis < 300) // podhodyshee li rastoynie
                             {
                                 inf[t] = true;
-                                std::cout << "IT'S ALIVE!!!" << std::endl;
                             }
                         }
                     }
@@ -171,13 +174,13 @@ void Win_Sim()
                     cars[t].move(0.f, (-0.05f + MaxSpeed / 10) * time);
                 }
                 else {  // esli vlianie est
-                    if (Var == 1) 
+                    if (Var == 1)
                     {
                         sf::Vector2f carPos = cars[t].getPosition();
-                        if (carPos.x < 100.f) 
+                        if (carPos.x < 125.f)
                         {
-                            cars[t].rotate(-0.01f);
-                            cars[t].move((0.01f + MaxSpeed / 10) * time, (-0.03f + MaxSpeed / 10) * time);
+                            cars[t].rotate(0.01f);
+                            cars[t].move((0.02f + MaxSpeed / 10) * time, (-0.04f + MaxSpeed / 10) * time);
                         }
                         else {
                             rotDone[t] = true;
@@ -191,25 +194,32 @@ void Win_Sim()
             }
             else // movement spec. car
             {
-                sf::Vector2f spCarPos = cars[spCarIs].getPosition();
-                for (int j = 0; j < 100; j++) {
-                    if (inf[j] == true && rotDone[j] == false)
-                    {
-                        sf::Vector2f carPos = cars[j].getPosition();
-                        float dis = carPos.y - spCarPos.y;
-                        if (dis > 0 and dis < 100) {
-                            slowDown = true;
+                if (spCarInGame == true) {
+                    sf::Vector2f spCarPos = cars[spCarIs].getPosition();
+                    for (int j = 0; j < 100; j++) {
+                        if (inf[j] == true && rotDone[j] == false)
+                        {
+                            sf::Vector2f carPos = cars[j].getPosition();
+                            float dis = spCarPos.y - carPos.y;
+                            if (dis > 0 && dis < 100) {
+                                slowDown = true;
+                                carsAheadCount = true;
+                            }
                         }
                     }
-                }
+                    if (carsAheadCount == false) {
+                        slowDown = false;
+                    }
+                    carsAheadCount = false;
 
-                if (slowDown == true) { // zamedlayem
-                    spCarSpd += 0.005f;
-                    cars[spCarIs].move(0.f, spCarSpd * time);
-                }
-                else { // yscorayem
-                    spCarSpd += -0.005f;
-                    cars[spCarIs].move(0.f, spCarSpd * time);
+                    if (slowDown == true) { // zamedlayem
+                        spCarSpd += 0.00005f;
+                        cars[spCarIs].move(0.f, spCarSpd * time);
+                    }
+                    else { // yscorayem
+                        spCarSpd += -0.00005f;
+                        cars[spCarIs].move(0.f, spCarSpd * time);
+                    }
                 }
             }
         }
@@ -275,7 +285,7 @@ void Win_Sim()
         // àâòî - ðèñîâêà
         for (int t = 0; t < 100; t++)
         {
-            if (ingame[t] = true) {
+            if (ingame[t] == true) {
                 window.draw(cars[t]);
             }
         }
