@@ -150,6 +150,7 @@ void Win_Sim()
                             if (dis > 0 && dis < 300) // podhodyshee li rastoynie
                             {
                                 inf[t] = true;
+                                std::cout << "IT'S ALIVE!!!" << std::endl;
                             }
                         }
                     }
@@ -194,7 +195,7 @@ void Win_Sim()
                 for (int j = 0; j < 100; j++) {
                     if (inf[j] == true && rotDone[j] == false)
                     {
-                        sf::Vector2f carPos = cars[t].getPosition();
+                        sf::Vector2f carPos = cars[j].getPosition();
                         float dis = carPos.y - spCarPos.y;
                         if (dis > 0 and dis < 100) {
                             slowDown = true;
@@ -204,11 +205,11 @@ void Win_Sim()
 
                 if (slowDown == true) { // zamedlayem
                     spCarSpd += 0.005f;
-                    cars[spCarIs].move(0.f, spCarSpd* time);
+                    cars[spCarIs].move(0.f, spCarSpd * time);
                 }
                 else { // yscorayem
                     spCarSpd += -0.005f;
-                    cars[spCarIs].move(0.f, spCarSpd* time);
+                    cars[spCarIs].move(0.f, spCarSpd * time);
                 }
             }
         }
