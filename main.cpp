@@ -12,7 +12,7 @@ int Var;
 void Win_Sim()
 {
     int r2 = -1;
-    
+
     float cartimer = 0; // Òàéìåð ïîÿâëåíèÿ ìàøèí
     float lineTimer[4] = { 1000 };
 
@@ -46,16 +46,17 @@ void Win_Sim()
     // âñ¸ äëÿ àâòî
     sf::RectangleShape cars[100];
     bool ingame[100] = { false };
-    float dis[100] = { -1 }; // дистанция каждой машины до машины спецтранспорта по оси Y
+    bool inf[100] = { false }; // vozdeystvie (influence) spec.car na drugie machinu
+    bool rotDone[100] = { false }; // povernulas' li machina
     float posX[4]{ 52.5f, 162.5f, 272.5f, 382.5f };
 
     int carin = 0;
     int carline = 0;
 
-    sf::RectangleShape spCar;
-    spCar.setSize(sf::Vector2f(40.f, 70.f));
-    spCar.setFillColor(sf::Color::Red);
     bool spCarInGame = false;
+    int spCarIs = 25;
+    bool slowDown = false;
+    float spCarSpd = -0.05 + MaxSpeed / 10;
 
     while (window.isOpen())
     {
@@ -76,41 +77,140 @@ void Win_Sim()
                 window.close();
         }
 
-        int startr1 = 1000;
-        int endr1 = 7500;
+        int startr1 = 2000;
+        int endr1 = 10000;
         int r1 = std::rand() % (endr1 - startr1 + 1) + startr1;
         // àâòî - ñïàóí
         if (cartimer > r1 / Traffic)
         {
-            int startr2 = 0;
-            int endr2 = 3;
-            int rpast = r2;
-            int r2 = std::rand() % (endr2 - startr2 + 1) + startr2;
-            while (r2 == rpast) { r2 = std::rand() % (endr2 - startr2 + 1) + startr2; } // r2 - polosa
-
-            if (lineTimer[r2] > 9000 / MaxSpeed) 
+            if (carin == spCarIs) 
             {
-                cars[carin].setSize(sf::Vector2f(40.f, 70.f));
-                cars[carin].setFillColor(sf::Color::Yellow);
+                if (Var == 1) // 1 var (sboku)
+                {
+                    if (lineTimer[0] > 9000 / MaxSpeed) 
+                    {
+                        cars[carin].setSize(sf::Vector2f(40.f, 70.f));
+                        cars[carin].setFillColor(sf::Color::Green);
 
-                cars[carin].setPosition(posX[r2], 780.f);
-                carin++;
-                ingame[carin] = true;
-                cartimer = 0;
-                lineTimer[r2] = 0;
+                        cars[carin].setPosition(posX[0], 780.f);
+                        carin++;
+                        ingame[carin] = true;
+                        cartimer = 0;
+                        lineTimer[0] = 0;
 
-                std::cout << carin << std::endl;
+                        std::cout << carin << std::endl;
+                    }
+                }
+                else // 2 var (megdu)
+                {
+                    //
+                }
+            }
+            else 
+            {
+                int startr2 = 0;
+                int endr2 = 3;
+                int rpast = r2;
+                int r2 = std::rand() % (endr2 - startr2 + 1) + startr2;
+                while (r2 == rpast) { r2 = std::rand() % (endr2 - startr2 + 1) + startr2; } // r2 - polosa
 
-                if (carin == CountOfLines * 25) {
-                    carin = 0;
+                if (lineTimer[r2] > 9000 / MaxSpeed)
+                {
+                    cars[carin].setSize(sf::Vector2f(40.f, 70.f));
+                    cars[carin].setFillColor(sf::Color::Yellow);
+
+                    cars[carin].setPosition(posX[r2], 780.f);
+                    carin++;
+                    ingame[carin] = true;
+                    cartimer = 0;
+                    lineTimer[r2] = 0;
+
+                    std::cout << carin << std::endl;
+
+                    if (carin == CountOfLines * 25) {
+                        carin = 0;
+                    }
                 }
             }
         }
 
-        // àâòî - äâèæåíèå (è óäàëåíèå)
+        // influence of spec.car
+        if (spCarInGame == true)
+        {
+            for (int t = 0; t < 100; t++)
+            {
+                if (t != spCarIs) {
+                    if (Var == 1)
+                    {
+                        sf::Vector2f carPos = cars[t].getPosition();
+                        if (carPos.x == 52.5f) // proveraym na 1 polose li
+                        {
+                            sf::Vector2f spCarPos = cars[spCarIs].getPosition();
+                            float dis = carPos.y - spCarPos.y;
+                            if (dis > 0 && dis < 300) // podhodyshee li rastoynie
+                            {
+                                inf[t] = true;
+                            }
+                        }
+                    }
+                    else
+                    {
+                        //
+                    }
+                }
+            }
+        }
+
+        // movement
         for (int t = 0; t < 100; t++)
         {
-            cars[t].move(0.f, (-0.05f + MaxSpeed / 10) * time);
+            if (t != spCarIs)
+            {
+                if (inf[t] == false) { // esli vliania net
+                    cars[t].move(0.f, (-0.05f + MaxSpeed / 10) * time);
+                }
+                else {  // esli vlianie est
+                    if (Var == 1) 
+                    {
+                        sf::Vector2f carPos = cars[t].getPosition();
+                        if (carPos.x < 100.f) 
+                        {
+                            cars[t].rotate(-0.01f);
+                            cars[t].move((0.01f + MaxSpeed / 10) * time, (-0.03f + MaxSpeed / 10) * time);
+                        }
+                        else {
+                            rotDone[t] = true;
+                        }
+                    }
+                    else
+                    {
+                        //
+                    }
+                }
+            }
+            else // movement spec. car
+            {
+                sf::Vector2f spCarPos = cars[spCarIs].getPosition();
+                for (int j = 0; j < 100; j++) {
+                    if (inf[j] == true && rotDone[j] == false)
+                    {
+                        sf::Vector2f carPos = cars[t].getPosition();
+                        float dis = carPos.y - spCarPos.y;
+                        if (dis > 0 and dis < 100) {
+                            slowDown = true;
+                        }
+                    }
+                }
+
+                if (slowDown == true) { // zamedlayem
+                    spCarSpd += 0.005f;
+                    cars[spCarIs].move(0.f, spCarSpd* time);
+                }
+                else { // yscorayem
+                    spCarSpd += -0.005f;
+                    cars[spCarIs].move(0.f, spCarSpd* time);
+                }
+            }
         }
 
         // спаун спец-машины
