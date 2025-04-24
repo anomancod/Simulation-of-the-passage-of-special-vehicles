@@ -13,11 +13,10 @@ void Win_Sim()
 {
     int r2 = -1;
 
-    float cartimer = 0; // Òàéìåð ïîÿâëåíèÿ ìàøèí
+    float cartimer = 0; 
     float lineTimer[4] = { 1000 };
 
-    // Êâàäðàò äëÿ ïîëîñ
-    float BoL = CountOfLines * 110.f; // 100 - ïîëîñà, 10 - ðàçäåëåíèå
+    float BoL = CountOfLines * 110.f;
 
     sf::ConvexShape BoxOfLines1;
     BoxOfLines1.setPointCount(4);
@@ -35,6 +34,10 @@ void Win_Sim()
     BoxOfLines2.setPoint(2, sf::Vector2f(BoL + 10.f, 800.f));
     BoxOfLines2.setPoint(3, sf::Vector2f(20.f, 800.f));
 
+    // Create of Black Screen
+    sf::RectangleShape BlackScreen(sf::Vector2f(100.f * CountOfLines, 800.f));
+    BlackScreen.setPosition(-35.f, 800.f);
+    BlackScreen.setFillColor(sf::Color::Black);
 
     sf::RenderWindow window(sf::VideoMode(1200, 800), "Road Simulator");
 
@@ -43,7 +46,6 @@ void Win_Sim()
 
     sf::Clock clock;
 
-    // âñ¸ äëÿ àâòî
     sf::RectangleShape cars[100];
     bool ingame[100] = { false };
     bool inf[100] = { false }; // vozdeystvie (influence) spec.car na drugie machinu
@@ -61,11 +63,11 @@ void Win_Sim()
 
     while (window.isOpen())
     {
-        float time = clock.getElapsedTime().asMicroseconds(); // äàòü ïðîøåäøåå âðåìÿ â ìèêðîñåêóíäàõ
-        clock.restart(); //ïåðåçàãðóæàåò âðåìÿ
-        time = time / 1000; //ñêîðîñòü èãðû
+        float time = clock.getElapsedTime().asMicroseconds();
+        clock.restart();
+        time = time / 1000;
 
-        cartimer += time; // ðåàëèçàöèÿ ìàøèííîãî òàéìåðà
+        cartimer += time;
         lineTimer[0] += time;
         lineTimer[1] += time;
         lineTimer[2] += time;
@@ -201,7 +203,7 @@ void Win_Sim()
                         {
                             sf::Vector2f carPos = cars[j].getPosition();
                             float dis = spCarPos.y - carPos.y;
-                            if (dis > 0 && dis < 100) {
+                            if (dis > 0 && dis < 80) {
                                 slowDown = true;
                                 carsAheadCount = true;
                             }
@@ -213,49 +215,18 @@ void Win_Sim()
                     carsAheadCount = false;
 
                     if (slowDown == true) { // zamedlayem
-                        spCarSpd += 0.00005f;
+                        spCarSpd += 0.0001f;
                         cars[spCarIs].move(0.f, spCarSpd * time);
+                        BlackScreen.move(0.f, spCarSpd* time);
                     }
                     else { // yscorayem
                         spCarSpd += -0.00005f;
                         cars[spCarIs].move(0.f, spCarSpd * time);
+                        BlackScreen.move(0.f, spCarSpd* time);
                     }
                 }
             }
         }
-
-        // спаун спец-машины
-        /*if (cartimer > 5000)
-        {
-            spCarInGame = true;
-            if (Var == 1)
-            {
-                spCar.setPosition(20.f, 780.f);
-            }
-        }
-
-        // проверяем дистанцию машин до спецтранспорта
-        sf::Vector2f soCarPos = spCar.getPosition();
-        for (int t = 0; t < 20; t++)
-        {
-            if (ingame[t] == true)
-            {
-                if (Var == 1) {
-                    soCarPos.x = soCarPos.x + 32.5f;
-                    if (cars[t].getPosition() == soCarPos + (5.f, 10.f))
-                    {
-
-                    }
-                }
-            }
-        }
-
-        // движение спец-машины
-        if (spCarInGame == true)
-        {
-            // проверяем расстояние до всех друг машин
-
-        }*/
 
         window.clear(sf::Color::Black);
 
@@ -289,6 +260,9 @@ void Win_Sim()
                 window.draw(cars[t]);
             }
         }
+
+        // Draw BlackScreen
+        window.draw(BlackScreen);
 
         // end the current frame
         window.display();
