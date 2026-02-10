@@ -7,7 +7,7 @@ bool LightCars = true;
 bool HeavyCars = false;
 int MaxSpeed = 5;
 
-int ;
+int Var;
 
 void Win_Sim()
 {
@@ -447,4 +447,5 @@ int main()
     //Win_Set();
     Win_Sim();
 }
+
 
